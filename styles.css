@@ -1,0 +1,218 @@
+/* Palette: pink background, crimson petals, and a muted green as their complement */
+:root {
+  --blush: #ffe6ec;
+  --pink: #ffa9c1;
+  --berry: #b23a68;
+  --leaf-d: #1b5e43;
+  --leaf-l: #5cbf8a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  background: radial-gradient(ellipse at 50% 42%, var(--blush) 0, var(--pink) 50%, var(--berry) 100%);
+}
+
+.not-loaded * { animation-play-state: paused !important; }
+
+/* The stage is a 0x0 box at the screen centre, scaled by script.js to fit any screen */
+.stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: scale(var(--s, 1));
+}
+
+.title {
+  position: absolute;
+  left: -350px;
+  top: -355px;
+  width: 700px;
+  margin: 0;
+  text-align: center;
+  font: 400 104px/1 'Great Vibes', 'Brush Script MT', cursive;
+  color: rgba(255, 255, 255, .92);
+  text-shadow: 0 0 26px rgba(255, 255, 255, .85), 0 4px 14px rgba(160, 30, 80, .4);
+  animation: appear 2.4s 3.2s both;
+}
+
+.plant {
+  position: absolute;
+  transform-origin: 0 360px;
+  animation: sway 7s ease-in-out infinite alternate;
+}
+.plant > * { position: absolute; }
+
+/* Glow */
+.glow {
+  left: -300px;
+  top: -360px;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 244, 214, .95) 0, rgba(255, 170, 195, .45) 38%, transparent 68%);
+  animation: appear 2.5s 2.2s both, pulse 3.6s 4.7s ease-in-out infinite;
+}
+
+/* Stem: a gently curved ribbon that grows upward */
+.stem {
+  left: -60px;
+  top: -60px;
+  width: 120px;
+  height: 420px;
+  transform-origin: bottom;
+  background: linear-gradient(to top, var(--leaf-d), var(--leaf-l));
+  clip-path: path('M56 0C88 130 24 290 56 420L64 420C32 290 96 130 64 0Z');
+  animation: grow 1.8s cubic-bezier(.3, .7, .2, 1) both;
+}
+
+/* Leaves: arching blades that unfurl, then flutter softly */
+.leaf {
+  width: 220px;
+  height: 100px;
+  transform-origin: 0 60px;
+  background: linear-gradient(100deg, var(--leaf-d), var(--leaf-l) 65%, var(--leaf-d));
+  clip-path: path('M0 60C50 10 150 0 220 55C150 30 60 45 0 60Z');
+  animation: pop 1.2s 1s ease-out both, flutter 6s 2.4s ease-in-out infinite;
+}
+.leaf.r { left: -2px; top: 170px; transform: rotate(-14deg); }
+.leaf.l { left: -6px;  top: 105px; transform: scaleX(-1) rotate(-22deg); animation-delay: 1.3s, 3s; }
+.leaf.m { left: 10px;    top: 30px;  transform: rotate(-38deg); scale: .6; animation-delay: 1.6s, 3.4s; }
+
+/* Flower head: smaller than the plant, petals fan out from its centre */
+.head {
+  left: 0;
+  top: -60px;
+  scale: .62;
+  filter: drop-shadow(0 8px 16px rgba(140, 15, 65, .4)) drop-shadow(0 0 22px rgba(255, 200, 215, .7));
+  animation: nod 8s 4.5s ease-in-out infinite alternate;
+}
+.head::after {
+  content: "";
+  position: absolute;
+  left: -28px;
+  top: -28px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffbe6 0, rgba(255, 226, 122, .85) 30%, transparent 70%);
+  animation: appear 1.5s 2.4s both;
+}
+.petal {
+  position: absolute;
+  left: -39px;
+  top: -200px;
+  width: 78px;
+  height: 200px;
+  transform-origin: 50% 100%;
+  transform: rotate(var(--a));
+  animation: bloom 1.8s cubic-bezier(.2, .8, .2, 1) calc(var(--d) + var(--i) * .12s) both;
+}
+.petal::before, .petal::after { content: ""; position: absolute; }
+.petal::before {
+  inset: 0;
+  clip-path: path('M39 200C33 180 22 160 20 130C16 80 28 40 46 0C62 36 84 86 70 140C64 166 48 186 39 200Z');
+  background:
+    linear-gradient(105deg, rgba(255, 255, 255, .28) 0, transparent 40%, rgba(120, 0, 40, .25) 100%),
+    linear-gradient(to top, #ffe9a8 0, #ff86a4 24%, #e0285a 62%, #9d0b3c 100%);
+}
+.petal::after {
+  left: 44px;
+  top: 26px;
+  width: 2px;
+  height: 130px;
+  transform-origin: 50% 0;
+  transform: rotate(2deg);
+  background: linear-gradient(rgba(255, 255, 255, .55), transparent);
+}
+.outer { --d: 1.4s; }
+.inner { --d: 2s; scale: -.8 .8; }
+.inner::before { filter: brightness(.9); }
+
+/* Clicking adds .fall to one petal */
+.petal.fall { animation: fall 4.8s cubic-bezier(.37, 0, .63, 1) forwards; }
+
+/* Stamens fan out in front of the petals; the long middle one is the pistil */
+.st {
+  position: absolute;
+  left: -1.5px;
+  top: calc(var(--l) * -1);
+  width: 3px;
+  height: var(--l);
+  transform-origin: bottom;
+  rotate: var(--a);
+  background: linear-gradient(to top, #fff3c4, #ffd45c);
+  animation: pop .8s ease-out both;
+}
+.st::after {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: -8px;
+  width: 9px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(#ff9f1c, #d9480f);
+}
+.pistil { background: linear-gradient(to top, #f4f9d6, #c5e36b); }
+.pistil::after { left: -3.5px; top: -5px; width: 10px; height: 10px; background: #c5e36b; }
+
+/* Floating lights */
+.sp {
+  position: fixed;
+  left: var(--x);
+  bottom: -10px;
+  width: var(--z);
+  height: var(--z);
+  border-radius: 50%;
+  background: radial-gradient(#fff, rgba(255, 236, 170, 0) 70%);
+  opacity: 0;
+  pointer-events: none;
+  animation: rise var(--t) var(--dl) linear infinite;
+}
+
+.hint {
+  position: fixed;
+  bottom: 4vh;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  font: 14px/1 system-ui, sans-serif;
+  letter-spacing: .15em;
+  color: #fff;
+  opacity: 0;
+  animation: blink 2.6s 5.5s infinite;
+}
+.touched .hint { animation: none; opacity: 0; }
+
+@keyframes sway   { from { transform: rotate(-1.2deg); } to { transform: rotate(1.2deg); } }
+@keyframes grow   { from { transform: scaleY(0); } }
+@keyframes pop    { from { scale: 0; } }
+@keyframes appear { from { opacity: 0; } }
+@keyframes pulse  { 50% { transform: scale(1.12); opacity: .75; } }
+@keyframes blink  { 0%, 100% { opacity: .2; } 50% { opacity: .9; } }
+@keyframes bloom  { from { transform: rotate(calc(var(--a) * .1)) scale(.55); opacity: 0; } }
+@keyframes fall {
+  18% { translate: calc(var(--dx) * .9) 110px;  rotate: calc(var(--sp) * .2);  transform: rotate(var(--a)) rotateY(60deg); }
+  38% { translate: calc(var(--dx) * -.7) 270px; rotate: calc(var(--sp) * .45); transform: rotate(var(--a)) rotateY(-50deg); }
+  58% { translate: calc(var(--dx) * .6) 440px;  rotate: calc(var(--sp) * .7);  transform: rotate(var(--a)) rotateY(45deg); }
+  78% { translate: calc(var(--dx) * -.4) 590px; rotate: calc(var(--sp) * .9);  transform: rotate(var(--a)) rotateY(-30deg); opacity: 1; }
+  100% { translate: calc(var(--dx) * .3) 700px; rotate: var(--sp); transform: rotate(var(--a)) rotateY(10deg); opacity: 0; }
+}
+@keyframes nod     { 50% { rotate: -3deg; } 100% { rotate: 3deg; } }
+@keyframes flutter { 50% { rotate: 3deg; } }
+@keyframes rise {
+  10% { opacity: .9; }
+  90% { opacity: .5; }
+  to  { transform: translate(var(--dx), -108vh); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plant, .glow, .sp { animation-duration: 0s; }
+}
